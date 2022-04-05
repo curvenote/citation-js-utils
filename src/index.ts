@@ -81,11 +81,12 @@ export type CitationRenderer = Record<
 >;
 
 function wrapWithDoiAchorTag(doiStr: string) {
+  if (!doiStr) return '';
   return `<a target="_blank" rel="noreferrer" href="https://doi.org/${doiStr}">${doiStr}</a>`;
 }
 
 const URL_REGEX =
-  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 
 function replaceDoiWithAnchorElement(str: string, doi: string) {
   if (!str) return str;
