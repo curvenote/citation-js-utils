@@ -10,6 +10,7 @@ describe('Test reference rendering', () => {
     const cite = citations[key];
     expect(cite.render()).toEqual(TEST_APA_HTML);
     expect(cite.render(CitationJSStyles.apa)).toEqual(TEST_APA_HTML);
+    expect(cite.getDOI()).toEqual('10.1016/j.cageo.2015.09.015');
   });
   it('Vancouver', async () => {
     const citations = await getCitations(bibtex);

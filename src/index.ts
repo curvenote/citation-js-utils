@@ -75,6 +75,7 @@ export type CitationRenderer = Record<
   {
     render: (style?: CitationJSStyles) => string;
     inline: (kind?: InlineCite) => InlineNode[];
+    getDOI: () => string | undefined;
     cite: any;
   }
 >;
@@ -98,6 +99,9 @@ export async function getCitations(bibtex: string): Promise<CitationRenderer> {
                 .set(c)
                 .get({ ...defaultString, style: style ?? CitationJSStyles.apa }),
             );
+          },
+          getDOI(): string | undefined {
+            return c.DOI || undefined;
           },
           cite: c,
         },
