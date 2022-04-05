@@ -19,7 +19,8 @@ export function createSanitizer() {
 }
 function cleanRef(citation: string) {
   const sanitizer = createSanitizer();
-  return sanitizer.cleanCitationHtml(citation).replace(/^1. /, '').trim();
+  const cleanHtml = sanitizer.cleanCitationHtml(citation).trim();
+  return cleanHtml.replace(/^1\./g, '').trim();
 }
 
 const defaultOpts: CitationFormatOptions = {
@@ -71,7 +72,11 @@ export function getInlineCitation(c: Cite, kind: InlineCite) {
 
 export type CitationRenderer = Record<
   string,
-  { render: () => string; inline: (kind?: InlineCite) => InlineNode[]; cite: any }
+  {
+    render: (style?: CitationJSStyles) => string;
+    inline: (kind?: InlineCite) => InlineNode[];
+    cite: any;
+  }
 >;
 
 export async function getCitations(bibtex: string): Promise<CitationRenderer> {
@@ -87,8 +92,12 @@ export async function getCitations(bibtex: string): Promise<CitationRenderer> {
           inline(kind = InlineCite.p) {
             return getInlineCitation(c, kind);
           },
-          render() {
-            return cleanRef(cite.set(c).get(defaultString));
+          render(style?: CitationJSStyles) {
+            return cleanRef(
+              cite
+                .set(c)
+                .get({ ...defaultString, style: style ?? CitationJSStyles.apa }),
+            );
           },
           cite: c,
         },
