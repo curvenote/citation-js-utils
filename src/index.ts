@@ -80,6 +80,29 @@ export type CitationRenderer = Record<
   }
 >;
 
+function wrapWithAchorTag(str: string, text: string) {
+  return `<a target="_blank" rel="noreferrer" href="${str}">${text}</a>`;
+}
+
+const URL_REGEX =
+  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+
+function replaceHttpToHttps(str: string) {
+  return str.replace(/http:\/\//i, 'https://');
+}
+
+function removeLegacyDxDoi(str: string) {
+  return str.replace('dx.', '');
+}
+
+function replaceDoiWithAnchorElement(str: string, anchorText: string) {
+  if (!str) return str;
+  const match = str.match(URL_REGEX);
+  if (!match) return str;
+  const full = match[0];
+  return str.replace(URL_REGEX, wrapWithAchorTag(full, anchorText));
+}
+
 export async function getCitations(bibtex: string): Promise<CitationRenderer> {
   const parse = Cite.parse.input.async.chain;
   const cite = new Cite();
@@ -94,10 +117,17 @@ export async function getCitations(bibtex: string): Promise<CitationRenderer> {
             return getInlineCitation(c, kind);
           },
           render(style?: CitationJSStyles) {
-            return cleanRef(
-              cite
-                .set(c)
-                .get({ ...defaultString, style: style ?? CitationJSStyles.apa }),
+            return removeLegacyDxDoi(
+              replaceHttpToHttps(
+                replaceDoiWithAnchorElement(
+                  cleanRef(
+                    cite
+                      .set(c)
+                      .get({ ...defaultString, style: style ?? CitationJSStyles.apa }),
+                  ),
+                  c.DOI,
+                ),
+              ),
             );
           },
           getDOI(): string | undefined {
